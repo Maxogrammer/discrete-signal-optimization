@@ -1,21 +1,22 @@
 from json import load
 
 
-def convert_1type(t: int, action_type: str, cipher_path: str) -> str:
+def convert_cycle(actions: list, cipher_path: str) -> str:
 	'''
-	Преобразовывает временной интервал в строку по шифру.
+	Преобразует целый цикл в строку используя шифр.
+
+	actions — список деятельности в виде [[время, тип], [время, тип] ...]
+	cipher_path — путь к файлу шифра в виде строки; пример: "Encryption\Cipher\Phone1.json"
 	'''
 
+	result = ''
 	with open(cipher_path, 'r') as cipher:
-		data = load(cipher)[action_type]
+		data = load(cipher)
 
-		result = action_type*(t // data['tau'])
+	for action in actions:
+		(t, action_type) = action
+		tau = data[action_type]['tau']
+
+		result += action_type*(t // tau)
 
 	return result
-
-def convert_cycle():
-	'''
-	Преобразует целый цикл из Phone[i]chr.json в строку используя шифр.
-	'''
-
-	pass
