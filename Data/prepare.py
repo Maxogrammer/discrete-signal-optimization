@@ -4,121 +4,66 @@
 	а) создавать файлы, где каждая деятельность указана в хронологическом порядке — chr
 	б) создавать файлы, где найдена сумма каждой деятельности в каждом цикле — int
 '''
-#это баааааааза
-import json
-name = str(input("Введите название файла: "))
-file = open("C:/Users/Роман/Desktop/Phone-charge-prediction-main/Phone-charge-prediction-main/Data/PersonalExp/" + name + ".txt", "r", encoding="utf-8")
-file1 = open("C:/Users/Роман/Desktop/Phone-charge-prediction-main/Phone-charge-prediction-main/Data/PreparedExp/" + name + "(prepared).json", "w")
-pr_list_beg = []
-pr_list_end = []
-else_list = []
-else_list_num = []
-else_list_let = []
-finish_list = []
-pr = []
-c_list = []
-finish_finish_list =[]
-new_file = ""
-numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
-counter = 0
-
-#создание начального и конечного процентов как списков
-for str1 in file:
-    pr = []
-    pr_end = []
-    pr_beg = []
-    pr_list_beg = []
-    pr_list_end = []
-    for el in str1:
-        if counter == 1:
-            if el != " ":
-                pr_list_end.append(el)
-            else:
-                counter += 1
-        if counter == 0:
-            if el in numbers:
-                pr_list_beg.append(el)
-            if el == " ":
-                #наличие пробела означает окончание предыдущего числа
-                counter += 1
-
-        #создание списка со всем, кроме начального и конечного процентов
-        if counter >= 2:
-            if el == "о":
-                else_list.append("O")
-            elif el == "з":
-                else_list.append("I")
-            elif el == "м":
-                else_list.append("@")
-            elif el == "в":
-                else_list.append("&")
-            else:
-                else_list.append(el)
-    # объеденение списоков в строки, а зате превращение их в числа
-    pr_beg = "".join(pr_list_beg)
-    pr_end = "".join(pr_list_end)
-    pr_beg = int(pr_beg)
-    pr_end = int(pr_end)
-    pr.append(pr_beg)
-    pr.append(pr_end)
-    finish_list.append(pr)
-
-    # обнуление счетчиков для дальнейшего их использования.
-    # Удаление первого символа в спике, в котором есть все, кроме начального и конечного процентов, потому что мешает.
-    counter = 0
-    len_counter = 0
-    else_list.pop(0)
-
-    # разбор списка, в котором нет начального и конечного процентов, на отдельные списки
-    for el in else_list:
-        if counter == 1:
-            # объединение списков из цифр и списка из букв в один список
-            else_list_num_joined = "".join(else_list_num)
-            else_list_num_joined = int(else_list_num_joined)
-            else_list_let_joined = "".join(else_list_let)
-            c_list.append(else_list_num_joined)
-            c_list.append(else_list_let_joined)
-            # удаление предыдущих списков с буквами и цифрами, чтобы затем по-новой их использовать
-            else_list_let = []
-            else_list_num = []
-            counter = 0
-            # добавление объедененного списка из цифры и буквы в конечный список
-            finish_list.append(c_list)
-            c_list = []
-        if counter == 0:
-            # создание списков с цифрами и буквами
-            if el in numbers:
-                else_list_num.append(el)
-            if el not in numbers and el != " " and el != "\n":
-                else_list_let.append(el)
-            if el == " ":
-                # наличие пробела означает окончание предыдущего числа с буквой
-                counter += 1
-            if el == "\n":
-                if else_list_num == []:
-                    exit
-                else:
-                    # объединение списков из цифр и списка из букв в один список
-                    else_list_num_joined = "".join(else_list_num)
-                    else_list_num_joined = int(else_list_num_joined)
-                    else_list_let_joined = "".join(else_list_let)
-                    c_list.append(else_list_num_joined)
-                    c_list.append(else_list_let_joined)
-                    # удаление предыдущих списков с буквами и цифрами, чтобы затем по-новой их использовать
-                    else_list_let = []
-                    else_list_num = []
-                    counter = 0
-                    # добавление объедененного списка из цифры и буквы в конечный список
-                    finish_list.append(c_list)
-                    c_list = []
-
-    # добавление конечного списка в json файл
-    finish_finish_list.append(finish_list)
-    finish_list = []
-    else_list = []
-
-#добавление конечного списка в json файл
-json.dump(finish_finish_list, file1, indent=4)
-file1.close()
-file.close()
-
+from json import dump
+from os import path as ospath
+current_directory = ospath.dirname(__file__)
+num_cyc = input("Enter the number of cycles: ")
+data_path = ospath.join(current_directory, 'PersonalExp', f'Phone{num_cyc}.txt')
+prep_data_path = ospath.join(current_directory, 'PreparedExp', f'Phone{num_cyc}chr.json')
+data = open(data_path, "r", encoding="utf-8")
+prep_data = open(prep_data_path, "w")
+num = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+buk = ["в", "м", "о", "з"]
+result = []
+def jjoin(para, num, buk):
+    void = ""
+    void1 = ""
+    for el in para:
+        if el in num:
+            void = "a"
+    if void == "":
+        return para
+    if void == "a":
+        void = ""
+    for x in para:
+        if x in num:
+            void = void + x
+        if x in buk:
+            if x == "о":
+                void1 = "O"
+            if x == "з":
+                void1 = "I"
+            if x == "м":
+                void1 = "@"
+            if x == "в":
+                void1 = "&"
+    para = []
+    para.append(int(void))
+    para.append(void1)
+    line_list.append(para)
+for line in data:
+    line_list = []
+    para = []
+    for el in line:
+        prob = 0
+        if el in num:
+            para.append(el)
+        if el in buk:
+            para.append(el)
+        if el == " ":
+            prob += 1
+            jjoin(para, num, buk)
+            para = []
+        if el == "\n":
+            pass
+    if prob == 0:
+        jjoin(para, num, buk)
+        para = []
+    para.append(line_list[0][0])
+    para.append(line_list[1][0])
+    line_list[0] = para
+    line_list.pop(1)
+    result.append(line_list)
+dump(result, prep_data)
+prep_data.close()
+data.close()
