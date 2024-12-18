@@ -27,7 +27,7 @@ def get_nums_from_file(phone_number: int, action_type: str) -> list:
 	'''
 
 	current_directory = ospath.dirname(__file__)
-	file_path = ospath.join(current_directory, '..', 'Data', 'PreparedExp', f'Phone{phone_number}chr.json')
+	file_path = ospath.join(current_directory, '..', 'Data', 'PreparedExp', f'Phone{phone_number}.json')
 
 	with open(file_path, 'r') as file:
 		data = load(file)
@@ -41,7 +41,7 @@ def get_nums_from_file(phone_number: int, action_type: str) -> list:
 	
 	return numbers
 
-def calc_tauO(numbers: list) -> int:
+def calc_tau(numbers: list) -> int:
 	'''
 	ЦНОД (Центрированный НОД) — считает tau.
 	'''
@@ -111,7 +111,7 @@ def find_tau_common(action_type: str) -> int:
 
 	return tau
 
-def calc_tau(numbers: list) -> float:
+def calc_tauN(numbers: list) -> float:
 	'''
 	Метод итераций.
 	'''

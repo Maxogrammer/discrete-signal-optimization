@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 import json
 from sys import path as syspath
+from os import path as ospath
 
 import matplotlib.pyplot as plt
 
@@ -15,6 +16,13 @@ window.geometry("800x600")
 text_for_terminal = "___"
 text_for_terminal1 = "VVV Введите номер строки VVV"
 text_for_txt = "___"
+
+usage_power = {
+    '@': 0.0675,
+    '&': 0.0676,
+    'O': 0.0674,
+    'I': 0.0674,    
+}
 
 terminal = tk.Text(window)
 terminal.place_configure(x=10, y=40, width=700, height=200)
@@ -44,11 +52,48 @@ def load_json_file():
 def plot_graph():
     """Функция для построения графика на основе данных."""
 
-    line1 = txt.get("1.0", "100.0")
-    if line1 != "":
-        fig, ax = plt.subplots()
-        ax.plot([1, 1.5, 2], [2, 1.8, 1])
-        fig.show()
+    ciphered_string = txt.get("1.0", tk.END)
+
+    current_directory = ospath.dirname(__file__)
+    data_path = ospath.join(current_directory, ".." , 'Data', 'PreparedExp', 'Phone1.json')
+    
+    with open(data_path, "r") as file:
+        full_data = json.load(file)[int(true_terminator.get("1.0", tk.END)) - 1]
+        perc0, perc_end, data = full_data[0][0], full_data[0][1], full_data[1:]
+
+    current_directory = ospath.dirname(__file__)
+    data_path = ospath.join(current_directory, ".." , 'Encryption', 'tau_common.json')
+    
+    with open(data_path, "r") as file:
+        tau_dict = json.load(file)
+
+    y_axis = [perc0]
+    x_axis = [0]
+
+    for i in range(len(ciphered_string) - 1):
+        char = ciphered_string[i]
+
+        x_axis.append(x_axis[-1] + tau_dict[char])
+        y_axis.append(y_axis[-1] - usage_power[char]*tau_dict[char])
+
+    y_orig = [perc0]
+    x_orig = [0]
+
+    for i in range(len(data)):
+        x_orig.append(x_orig[-1] + data[i][0])
+        y_orig.append(y_orig[-1] - usage_power[char]*data[i][0])
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(x_axis, y_axis, marker='o', linestyle='-', color='b', label="С шифровкой", linewidth=0.5, markersize=3)
+    plt.plot(x_orig, y_orig, marker='x', linestyle='dashed', color='g', label="Оригинал", linewidth=0.5, markersize=3)
+    plt.plot([0, x_orig[-1]], [perc0, y_orig[-1]], marker=7, color='r', label="Начальная и конечная точки", linewidth=0, markersize=10)
+
+    plt.xlabel("Время в течение цикла (мин)")
+    plt.ylabel("Процент заряда телефона")
+    plt.title("Зависимость заряда телефона от времени")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
 
 def load_and_plot():
     """Загружает данные и строит график."""
@@ -61,8 +106,8 @@ def load_and_plot():
 def encr():
     global writen1
     txt.delete('1.0', tk.END)
-    text_for_txt = encrypter1.encrypter(int(true_terminator.get("1.0", tk.END)))
-    # print(int(true_terminator.get("1.0")))
+    text_for_txt = encrypter1.encrypter(int(true_terminator.get("1.0", tk.END)) - 1)
+
     txt.insert(tk.END, text_for_txt)
 
 ###########################
