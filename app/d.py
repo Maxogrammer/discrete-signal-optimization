@@ -2,9 +2,14 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 import json
 from json import dump, load
-from os import path as ospath
+from sys import path as syspath
+
 import matplotlib.pyplot as plt
-import prepare1, encrypter1
+
+syspath.append('./')
+
+import Data.prepare1 as prepare1, Encryption.encrypter1 as encrypter1
+
 window = tk.Tk()
 window.title("График зависимости заряда батареи от времени")
 window.geometry("800x600")
@@ -13,11 +18,9 @@ text_for_terminal1 = "___"
 text_for_txt = "___"
 terminal = tk.Text(window)
 terminal.place_configure(x=10, y=40, width=700, height=200)
-#terminal1 = tk.Label(window, text=text_for_terminal1)
-#terminal1.place_configure(x=10, y=80)
+
 writen1 = []
-#def enter():
-    #input1 = txt.get("1.0", tk.END)
+
 def load_json_file():
     """Функция для выбора и загрузки JSON файла."""
     file_path = filedialog.askopenfilename(

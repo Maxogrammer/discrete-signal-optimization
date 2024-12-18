@@ -41,7 +41,7 @@ def get_nums_from_file(phone_number: int, action_type: str) -> list:
 	
 	return numbers
 
-def calc_tau(numbers: list) -> int:
+def calc_tauO(numbers: list) -> int:
 	'''
 	ЦНОД (Центрированный НОД) — считает tau.
 	'''
@@ -68,6 +68,9 @@ def calc_tau(numbers: list) -> int:
 
 	# Идеальный интервал — сумма / суммарное кол-во всех простых делителей. По сути, центр масс.
 	tau = sum_tmp // total
+
+	print([(i-round(i/tau))/i for i in numbers])
+	print([round(i/tau) for i in numbers])
 
 	return tau
 
@@ -107,3 +110,23 @@ def find_tau_common(action_type: str) -> int:
 	tau = calc_tau(numbers)
 
 	return tau
+
+def calc_tau(numbers: list) -> float:
+	'''
+	Метод итераций.
+	'''
+
+	print(numbers)
+	sum_T = sum(numbers)
+
+	tau_cur = 0.999 * sum_T / len(numbers)
+	tau_prev = 0
+	while abs(tau_cur-tau_prev) > 0.001:
+		tau_prev = tau_cur
+		rounded_sum_T = sum([round(i/tau_cur) for i in numbers])
+		tau_cur = sum_T / (rounded_sum_T)
+
+	print([(i-round(i/tau_cur))/i for i in numbers])
+	print([round(i/tau_cur) for i in numbers])
+
+	return tau_cur
