@@ -8,14 +8,16 @@ import matplotlib.pyplot as plt
 
 syspath.append('./')
 import Data.prepare as prepare1, Encryption.encrypter as encrypter1
+from Encryption.exec_tau_finder import calc_taus 
 
 window = tk.Tk()
 window.title("График зависимости заряда батареи от времени")
-window.geometry("800x600")
+window.geometry("720x600")
 
 text_for_terminal = "___"
 text_for_terminal1 = "VVV Введите номер строки VVV"
 text_for_txt = "___"
+text_for_txt2 = "___"
 
 usage_power = {
     '@': 0.0675,
@@ -29,8 +31,6 @@ terminal.place_configure(x=10, y=40, width=700, height=200)
 
 aboba_terminator = tk.Label(window, text=text_for_terminal1)
 aboba_terminator.place_configure(x=10, y=270)
-
-writen1 = []
 
 def load_json_file():
     """Функция для выбора и загрузки JSON файла."""
@@ -53,6 +53,7 @@ def plot_graph():
     """Функция для построения графика на основе данных."""
 
     ciphered_string = txt.get("1.0", tk.END)
+    ciphered_string2 = txt2.get("1.0", tk.END)
 
     current_directory = ospath.dirname(__file__)
     data_path = ospath.join(current_directory, ".." , 'Data', 'PreparedExp', 'Phone1.json')
@@ -61,20 +62,38 @@ def plot_graph():
         full_data = json.load(file)[int(true_terminator.get("1.0", tk.END)) - 1]
         perc0, perc_end, data = full_data[0][0], full_data[0][1], full_data[1:]
 
+    # Tau CGCF
     current_directory = ospath.dirname(__file__)
-    data_path = ospath.join(current_directory, ".." , 'Encryption', 'tau_common.json')
+    data_path = ospath.join(current_directory, ".." , 'Encryption', 'tau_CGCF.json')
     
     with open(data_path, "r") as file:
-        tau_dict = json.load(file)
+        tau_CGCF = json.load(file)
 
-    y_axis = [perc0]
-    x_axis = [0]
+    # Tau MMSE
+    current_directory = ospath.dirname(__file__)
+    data_path = ospath.join(current_directory, ".." , 'Encryption', 'tau_MMSE.json')
+    
+    with open(data_path, "r") as file:
+        tau_MMSE = json.load(file)
+
+    y_CGCF = [perc0]
+    x_CGCF = [0]
+
+    y_MMSE = [perc0]
+    x_MMSE = [0]
 
     for i in range(len(ciphered_string) - 1):
         char = ciphered_string[i]
 
-        x_axis.append(x_axis[-1] + tau_dict[char])
-        y_axis.append(y_axis[-1] - usage_power[char]*tau_dict[char])
+        x_CGCF.append(x_CGCF[-1] + tau_CGCF[char])
+        y_CGCF.append(y_CGCF[-1] - usage_power[char]*tau_CGCF[char])
+
+
+    for i in range(len(ciphered_string2) - 1):
+        char = ciphered_string2[i]
+
+        x_MMSE.append(x_MMSE[-1] + tau_MMSE[char])
+        y_MMSE.append(y_MMSE[-1] - usage_power[char]*tau_MMSE[char])
 
     y_orig = [perc0]
     x_orig = [0]
@@ -84,9 +103,10 @@ def plot_graph():
         y_orig.append(y_orig[-1] - usage_power[char]*data[i][0])
 
     plt.figure(figsize=(10, 6))
-    plt.plot(x_axis, y_axis, marker='o', linestyle='-', color='b', label="С шифровкой", linewidth=0.5, markersize=3)
-    plt.plot(x_orig, y_orig, marker='|', linestyle='dashed', color='g', label="Оригинал", linewidth=0.5, markersize=10)
-    plt.plot([0, x_orig[-1]], [perc0, perc_end], marker=7, color='r', label="Начальная и конечная точки", linewidth=0, markersize=10)
+    plt.plot(x_CGCF, y_CGCF, marker='o', linestyle='-', color='b', label="ЦНОД", linewidth=0.5, markersize=3)
+    plt.plot(x_MMSE, y_MMSE, marker='x', linestyle='-', color='y', label="ММСП", linewidth=0.75, markersize=3)
+    plt.plot(x_orig, y_orig, marker='|', linestyle='dashed', color='g', label="Оригинал", linewidth=1.5, markersize=20)
+    # plt.plot([0, x_orig[-1]], [perc0, perc_end], marker=7, color='r', label="Начальная и конечная точки", linewidth=0, markersize=10)
 
     plt.xlabel("Время в течение цикла (мин)")
     plt.ylabel("Процент заряда телефона")
@@ -104,11 +124,13 @@ def load_and_plot():
 ###########################
 
 def encr():
-    global writen1
     txt.delete('1.0', tk.END)
-    text_for_txt = encrypter1.encrypter(int(true_terminator.get("1.0", tk.END)) - 1)
+    txt2.delete('1.0', tk.END)
+
+    text_for_txt, text_for_txt2 = encrypter1.encrypter(int(true_terminator.get("1.0", tk.END)) - 1)
 
     txt.insert(tk.END, text_for_txt)
+    txt2.insert(tk.END, text_for_txt2)
 
 ###########################
 
@@ -144,6 +166,9 @@ def print1():
 def clear():
     terminal.delete("1.0", tk.END)
 
+def calc_tau():
+    calc_taus()
+
 ############################
 
 clear_button = tk.Button(window, text="clear", command=clear, relief=tk.FLAT, bg="lightgrey")
@@ -158,13 +183,19 @@ prepare_button.place_configure(x=350, y=10)
 txt = tk.Text(window, name='input')
 txt.place_configure(x=10, y=450, width=700, height=40)
 
+txt2 = tk.Text(window, name='input2')
+txt2.place_configure(x=10, y=500, width=700, height=40)
+
 graph_paint = tk.Button(window, text="graph", command=plot_graph, relief=tk.FLAT, bg="lightgrey")
 graph_paint.place_configure(x=10, y=420)
 
 encrypter_button = tk.Button(window, text="encrypt", command=encr, relief=tk.FLAT, bg="lightgrey")
-encrypter_button.place_configure(x=410, y=10)
+encrypter_button.place_configure(x=120, y=300)
 
 true_terminator = tk.Text(window)
 true_terminator.place_configure(x=10, y=300, width=100, height=30)
+
+process_tau_button = tk.Button(window, text="calc tau", command=calc_tau, relief=tk.FLAT, bg="lightblue")
+process_tau_button.place_configure(x=500, y=10)
 
 window.mainloop()

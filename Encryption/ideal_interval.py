@@ -41,7 +41,7 @@ def get_nums_from_file(phone_number: int, action_type: str) -> list:
 	
 	return numbers
 
-def calc_tau(numbers: list) -> int:
+def calc_tau_CGCF(numbers: list) -> float:
 	'''
 	ЦНОД (Центрированный НОД) — считает tau.
 	'''
@@ -67,29 +67,11 @@ def calc_tau(numbers: list) -> int:
 		sum_tmp += key*data[key]
 
 	# Идеальный интервал — сумма / суммарное кол-во всех простых делителей. По сути, центр масс.
-	tau = sum_tmp // total
-
-	print([(i-round(i/tau))/i for i in numbers])
-	print([round(i/tau) for i in numbers])
+	tau = round(sum_tmp / total, 1)
 
 	return tau
 
-
-def find_tau(phone_number: int, action_type: str) -> int:
-	'''
-	Берёт данные 1 телефона за все циклы из файла Phone[i]chr.json,
-	по специальному алгоритму находит tau.
-	'''
-
-	# Сбор данных
-	numbers = get_nums_from_file(phone_number, action_type)
-
-	# Расчёт tau
-	tau = calc_tau(numbers)
-
-	return tau
-
-def find_tau_common(action_type: str) -> int:
+def find_tau_CGCF(action_type: str) -> float:
 	'''
 	Берёт данные всех телефонов за все циклы из файлов Phone[i]chr.json,
 	по специальному алгоритму находит tau.
@@ -107,26 +89,50 @@ def find_tau_common(action_type: str) -> int:
 		numbers += get_nums_from_file(i, action_type)
 
 	# Расчёт tau
-	tau = calc_tau(numbers)
+	tau = calc_tau_CGCF(numbers)
 
 	return tau
 
-def calc_tauN(numbers: list) -> float:
+def calc_tau_MMSE(numbers: list) -> float:
 	'''
-	Метод итераций.
+	Метод минимизации суммы погрешностей.
 	'''
 
-	print(numbers)
-	sum_T = sum(numbers)
+	min_tau = max(numbers)
+	min_delta = sum(numbers)
 
-	tau_cur = 0.999 * sum_T / len(numbers)
-	tau_prev = 0
-	while abs(tau_cur-tau_prev) > 0.001:
-		tau_prev = tau_cur
-		rounded_sum_T = sum([round(i/tau_cur) for i in numbers])
-		tau_cur = sum_T / (rounded_sum_T)
+	delta_tau = 0.01
+ 
+	tau = 1 + delta_tau
+	while tau <= min(numbers):
+		delta = sum([(i-round(i/tau, 3)*tau) for i in numbers])
 
-	print([(i-round(i/tau_cur))/i for i in numbers])
-	print([round(i/tau_cur) for i in numbers])
+		if min_delta >= delta:
+			min_delta = delta
+			min_tau = tau
 
-	return tau_cur
+		tau += delta_tau	
+
+	return round(min_tau, 1)
+
+def find_tau_MMSE(action_type: str) -> float:
+	'''
+	Берёт данные всех телефонов за все циклы из файлов Phone[i]chr.json,
+	по специальному алгоритму находит tau.
+	'''
+
+	# Считает количество файлов
+	current_directory = ospath.dirname(__file__)
+	DIR = str(ospath.join(current_directory, '..', 'Data', 'PreparedExp'))
+
+	files_num = len([name for name in listdir(DIR) if ospath.isfile(ospath.join(DIR, name))])
+
+	# Сбор данных
+	numbers = []
+	for i in range(1, files_num + 1):
+		numbers += get_nums_from_file(i, action_type)
+
+	# Расчёт tau
+	tau = calc_tau_MMSE(numbers)
+
+	return tau
