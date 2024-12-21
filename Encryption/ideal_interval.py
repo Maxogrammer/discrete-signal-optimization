@@ -102,7 +102,7 @@ def calc_tau_MMSE(numbers: list) -> float:
 	min_delta = sum(numbers)
 
 	delta_tau = 0.01
- 
+
 	tau = 1 + delta_tau
 	while tau <= min(numbers):
 		delta = sum([(i-round(i/tau, 3)*tau) for i in numbers])
