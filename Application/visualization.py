@@ -102,12 +102,23 @@ def plot_graph():
         x_orig.append(x_orig[-1] + data[i][0])
         y_orig.append(y_orig[-1] - usage_power[char]*data[i][0])
 
+    # Init
     plt.figure(figsize=(10, 6))
     plt.plot(x_CGCF, y_CGCF, marker='o', linestyle='-', color='b', label="ЦНОД", linewidth=0.5, markersize=3)
     plt.plot(x_MMSE, y_MMSE, marker='x', linestyle='-', color='y', label="ММСП", linewidth=0.75, markersize=3)
     plt.plot(x_orig, y_orig, marker='|', linestyle='dashed', color='g', label="Оригинал", linewidth=1.5, markersize=20)
     # plt.plot([0, x_orig[-1]], [perc0, perc_end], marker=7, color='r', label="Начальная и конечная точки", linewidth=0, markersize=10)
 
+    x_end = x_orig[-1]
+    y_end = y_orig[-1]
+
+    # Prediction
+    plt.plot([x_end, x_end+y_end/usage_power['O']], [y_end, 0], linestyle='dashed', color='r', linewidth=1)
+    plt.plot([x_end, x_end+y_end/usage_power['I']], [y_end, 0], linestyle='dashed', color='r', linewidth=1)
+    plt.plot([x_end, x_end+y_end/usage_power['&']], [y_end, 0], linestyle='dashed', color='r', linewidth=1)
+    plt.plot([x_end, x_end+y_end/usage_power['@']], [y_end, 0], linestyle='dashed', color='r', linewidth=1)
+
+    # Plot
     plt.xlabel("Время в течение цикла (мин)")
     plt.ylabel("Процент заряда телефона")
     plt.title("Зависимость заряда телефона от времени")

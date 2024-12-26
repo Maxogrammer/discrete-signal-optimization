@@ -24,20 +24,26 @@ for i in range(len(full_data)):
 
 		new_data[i][symbol] = new_data[i][symbol] + num
 
-x = 0.0675
-y = 0.0676
-z = 0.0674
-w = 0.0674
+x0 = 0.0674
+y0 = 0.0674
+z0 = 0.0676
+w0 = 0.067
 
-n = 0
-n_old = 0
-delta = 0.00000001
+x = x0
+y = y0
+z = z0
+w = w0
 
-divisor = 2
-K = 100000000
+delta = 0.0001
+
+K = 5
+
 for k in range(K):
-	while n <= 27:
-		a = (x+y+z+w+1) / (divisor**(k+1))
+	n_old = 0
+
+	while n_old < 27:
+		n = 0
+		a = (x+y+z+w+1) * 50 / (k+1)
 
 		for i in range(len(new_data)):
 			cur = new_data[i]
@@ -46,22 +52,26 @@ for k in range(K):
 			if abs(sum1) <= a:
 				n += 1
 
-		if n_old <= n:		
+		if n < n_old:		
+			x = x0
+			y = y0
+			z = z0
+			w = w0
+		
+		else:
+			n_old = n
+
 			x0 = x
 			y0 = y
 			z0 = z
 			w0 = w
 
-			x = x + random()*delta
-			y = y + random()*delta
-			z = z + random()*delta
-			w = w + random()*delta
-		
-		else:
-			x = x0 + random()*delta
-			y = y0 + random()*delta
-			z = z0 + random()*delta
-			w = w0 + random()*delta
+		x = x0 + random()*delta
+		y = y0 + random()*delta
+		z = z0 + random()*delta
+		w = w0 + random()*delta
+
+	print(k)
 
 print(x)
 print(y)
