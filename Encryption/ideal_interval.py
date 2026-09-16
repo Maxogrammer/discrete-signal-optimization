@@ -67,7 +67,7 @@ def calc_tau_CGCF(numbers: list) -> float:
 		sum_tmp += key*data[key]
 
 	# Идеальный интервал — сумма / суммарное кол-во всех простых делителей. По сути, центр масс.
-	tau = round(sum_tmp / total, 1)
+	tau = round(sum_tmp / total, 3)
 
 	return tau
 
@@ -98,22 +98,23 @@ def calc_tau_MMSE(numbers: list) -> float:
 	Метод минимизации суммы погрешностей.
 	'''
 
-	min_tau = max(numbers)
+	min_tau = 1
 	min_delta = sum(numbers)
+	mean = sum(numbers)/len(numbers)
 
-	delta_tau = 0.01
+	delta_tau = 0.001
 
 	tau = 1 + delta_tau
-	while tau <= min(numbers):
-		delta = sum([(i-round(i/tau, 3)*tau) for i in numbers])
+	while tau <= mean:
+		delta = abs(sum([(i-round(i/tau)*tau) for i in numbers]))
 
 		if min_delta >= delta:
 			min_delta = delta
 			min_tau = tau
 
-		tau += delta_tau	
+		tau += delta_tau
 
-	return round(min_tau, 1)
+	return round(min_tau, 3)
 
 def find_tau_MMSE(action_type: str) -> float:
 	'''

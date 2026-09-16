@@ -18,95 +18,91 @@ with open(ospath.join(current_directory, 'tau_MMSE.json'), "r") as file:
 	tau_MMSE = json.load(file)
 
 
-deltas_CGCF = []
-deltas_MMSE = []
+def calc(tau_cur):
+	deltas = []
+	epss = []
+	int_deltas = []
+	int_epss = []
 
-epss_CGCF = []
-epss_MMSE = []
+	g_deltas = {'O': [],
+			 	'I': [],
+			 	'&': [],
+			 	'@': []}
+	
+	m_err_deltas = {'O': [],
+			 	'I': [],
+			 	'&': [],
+			 	'@': []}
 
 
+	for i in range(len(full_data)):
+		cycle = full_data[i][1:]	
 
-int_deltas_CGCF = []
-int_deltas_MMSE = []
+		deltas_t = []
+		epss_t = []
 
-int_epss_CGCF = []
-int_epss_MMSE = []
+		T = 0
+		for pair in cycle:
+			time, symbol = pair
 
-for i in range(len(full_data)):
-	cycle = full_data[i][1:]	
+			# Delta
+			round_t = round(time / tau_cur[symbol])
+			delta = abs(time - round_t*tau_cur[symbol])
+			deltas_t.append(delta)
+			m_err_deltas[symbol].append(1+round_t/time)
 
-	deltas_CGCF_t = []
-	deltas_MMSE_t = []
+			# Goodness
+			g_deltas[symbol].append(delta)
 
-	epss_CGCF_t = []
-	epss_MMSE_t = []
+			# Espilon
+			eps = delta / time
+			epss_t.append(eps)
 
-	T = 0
-	for pair in cycle:
-		time, symbol = pair
+			T += time
 
+		# Integral values
 		# Delta
-		delta_CGCF = abs(time - round(time / tau_CGCF[symbol])*tau_CGCF[symbol])
-		delta_MMSE = abs(time - round(time / tau_MMSE[symbol])*tau_MMSE[symbol])
+		int_delta = sum(deltas_t)
+		int_deltas.append(int_delta)
 
-		deltas_CGCF_t.append(delta_CGCF)
-		deltas_MMSE_t.append(delta_MMSE)
+		# Epsilon
+		int_eps = int_delta / T
+		int_epss.append(int_eps)
 
-		# Espilon
-		eps_CGCF = delta_CGCF / time
-		eps_MMSE = delta_MMSE / time
-
-		epss_CGCF_t.append(eps_CGCF)
-		epss_MMSE_t.append(eps_MMSE)
-
-		T += time
-
-	# Integral values
-	# Delta
-	int_delta_CGCF = sum(deltas_CGCF_t)
-	int_delta_MMSE = sum(deltas_MMSE_t)
-
-	int_deltas_CGCF.append(int_delta_CGCF)
-	int_deltas_MMSE.append(int_delta_MMSE)
-
-	# Epsilon
-	int_eps_CGCF = int_delta_CGCF / T
-	int_eps_MMSE = int_delta_MMSE / T
-
-	int_epss_CGCF.append(int_eps_CGCF)
-	int_epss_MMSE.append(int_eps_MMSE)	
-
-	# Save
-	deltas_CGCF += deltas_CGCF_t
-	deltas_MMSE += deltas_MMSE_t
-
-	epss_CGCF += epss_CGCF_t
-	epss_MMSE += epss_MMSE_t
+		# Save
+		deltas += deltas_t
+		epss += epss_t
 
 
-max_eps_CGCF, aver_eps_CGCF = max(epss_CGCF), sum(epss_CGCF)/len(epss_CGCF)
-max_eps_MMSE, aver_eps_MMSE = max(epss_MMSE), sum(epss_MMSE)/len(epss_MMSE)
+	min_eps, max_eps, aver_eps = min(epss), max(epss), sum(epss)/len(epss)
+	min_delta, max_delta, aver_delta = min(deltas), max(deltas), sum(deltas)/len(deltas)
 
-min_delta_CGCF, max_delta_CGCF, aver_delta_CGCF = min(deltas_CGCF), max(deltas_CGCF), sum(deltas_CGCF)/len(deltas_CGCF)
-min_delta_MMSE, max_delta_MMSE, aver_delta_MMSE = min(deltas_MMSE), max(deltas_MMSE), sum(deltas_MMSE)/len(deltas_MMSE)
+	min_int_delta, max_int_delta, aver_int_delta = min(int_deltas), max(int_deltas), sum(int_deltas)/len(int_deltas)
+	min_int_eps, max_int_eps, aver_int_eps = min(int_epss), max(int_epss), sum(int_epss)/len(int_epss)
+
+	print(min_delta, max_delta, aver_delta)
+	print(100*min_eps, 100*max_eps, 100*aver_eps)
+	print()
+
+	print(min_int_delta, max_int_delta, aver_int_delta)
+	print(100*min_int_eps, 100*max_int_eps, 100*aver_int_eps)
+	print('\n')
+
+	for i in g_deltas.keys():
+		print(min(g_deltas[i])/tau_cur[i]*100, max(g_deltas[i])/tau_cur[i]*100, sum(g_deltas[i])/len(g_deltas[i])/tau_cur[i]*100)
+
+	# print()
+	# for i in g_deltas.keys():
+	# 	print(min(g_deltas[i])/tau_cur[i]*100, max(g_deltas[i])/tau_cur[i]*100, sum(g_deltas[i])/len(g_deltas[i])/tau_cur[i]*100)
+
+	# s = 0
+	# n = 0
+	# for i in g_deltas.keys():
+	# 	s += sum(m_err_deltas[i])
+	# 	n += len(m_err_deltas[i])
+	# print(s/n)
 
 
-min_int_delta_CGCF, max_int_delta_CGCF, aver_int_delta_CGCF = min(int_deltas_CGCF), max(int_deltas_CGCF), sum(int_deltas_CGCF)/len(int_deltas_CGCF)
-min_int_delta_MMSE, max_int_delta_MMSE, aver_int_delta_MMSE = min(int_deltas_MMSE), max(int_deltas_MMSE), sum(int_deltas_MMSE)/len(int_deltas_MMSE)
-
-min_int_eps_CGCF, max_int_eps_CGCF, aver_int_eps_CGCF = min(int_epss_CGCF), max(int_epss_CGCF), sum(int_epss_CGCF)/len(int_epss_CGCF)
-min_int_eps_MMSE, max_int_eps_MMSE, aver_int_eps_MMSE = min(int_epss_MMSE), max(int_epss_MMSE), sum(int_epss_MMSE)/len(int_epss_MMSE)
-
-print(min_delta_CGCF, max_delta_CGCF, aver_delta_CGCF)
-print(min_delta_MMSE, max_delta_MMSE, aver_delta_MMSE)
-print()
-print(100*max_eps_CGCF, 100*aver_eps_CGCF)
-print(100*max_eps_MMSE, 100*aver_eps_MMSE)
-print()
-print()
-
-print(min_int_delta_CGCF, max_int_delta_CGCF, aver_int_delta_CGCF)
-print(min_int_delta_MMSE, max_int_delta_MMSE, aver_int_delta_MMSE)
-print()
-print(100*min_int_eps_CGCF, 100*max_int_eps_CGCF, 100*aver_int_eps_CGCF)
-print(100*min_int_eps_MMSE, 100*max_int_eps_MMSE, 100*aver_int_eps_MMSE)
+calc(tau_CGCF)
+print("-----------------------------------------------------------")
+calc(tau_MMSE)
