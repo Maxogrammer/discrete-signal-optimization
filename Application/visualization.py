@@ -29,8 +29,8 @@ usage_power = {
 terminal = tk.Text(window)
 terminal.place_configure(x=10, y=40, width=700, height=200)
 
-aboba_terminator = tk.Label(window, text=text_for_terminal1)
-aboba_terminator.place_configure(x=10, y=270)
+prompt_label = tk.Label(window, text=text_for_terminal1)
+prompt_label.place_configure(x=10, y=270)
 
 def load_json_file():
     """Функция для выбора и загрузки JSON файла."""
@@ -59,7 +59,7 @@ def plot_graph():
     data_path = ospath.join(current_directory, ".." , 'Data', 'PreparedExp', 'Phone1.json')
     
     with open(data_path, "r") as file:
-        full_data = json.load(file)[int(true_terminator.get("1.0", tk.END)) - 1]
+        full_data = json.load(file)[int(cycle_input_field.get("1.0", tk.END)) - 1]
         perc0, perc_end, data = full_data[0][0], full_data[0][1], full_data[1:]
 
     # Tau CGCF
@@ -138,7 +138,7 @@ def encr():
     txt.delete('1.0', tk.END)
     txt2.delete('1.0', tk.END)
 
-    text_for_txt, text_for_txt2 = encrypter1.encrypter(int(true_terminator.get("1.0", tk.END)) - 1)
+    text_for_txt, text_for_txt2 = encrypter1.encrypter(int(cycle_input_field.get("1.0", tk.END)) - 1)
 
     txt.insert(tk.END, text_for_txt)
     txt2.insert(tk.END, text_for_txt2)
@@ -203,8 +203,8 @@ graph_paint.place_configure(x=10, y=420)
 encrypter_button = tk.Button(window, text="encrypt", command=encr, relief=tk.FLAT, bg="lightgrey")
 encrypter_button.place_configure(x=120, y=300)
 
-true_terminator = tk.Text(window)
-true_terminator.place_configure(x=10, y=300, width=100, height=30)
+cycle_input_field = tk.Text(window)
+cycle_input_field.place_configure(x=10, y=300, width=100, height=30)
 
 process_tau_button = tk.Button(window, text="calc tau", command=calc_tau, relief=tk.FLAT, bg="lightblue")
 process_tau_button.place_configure(x=500, y=10)
